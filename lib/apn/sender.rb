@@ -19,11 +19,11 @@ module APN
     TIMES_TO_RETRY_SOCKET_ERROR = 2
                                 
     # Send a raw string over the socket to Apple's servers (presumably already formatted by APN::Notification)
-    def send_to_apple( notification, attempt = 0 )
+    def send_to_apple(notification, full_cert_path , attempt = 0)
+      define_certificate(full_cert_path)
       if attempt > TIMES_TO_RETRY_SOCKET_ERROR
         log_and_die("Error with connection to #{apn_host} (retried #{TIMES_TO_RETRY_SOCKET_ERROR} times): #{error}")
       end
-      
       self.socket.write( notification.to_s )
     rescue SocketError => error
       log(:error, "Error with connection to #{apn_host} (attempt #{attempt}): #{error}")
@@ -31,7 +31,7 @@ module APN
       # Try reestablishing the connection
       teardown_connection
       setup_connection
-      send_to_apple(notification, attempt + 1)
+      send_to_apple(notification, full_cert_path, attempt + 1)
     end
     
     protected

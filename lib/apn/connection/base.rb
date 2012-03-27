@@ -67,20 +67,9 @@ module APN
       # Get a fix on the .pem certificate we'll be using for SSL
       def setup_paths
         @opts[:environment] ||= ::Rails.env if defined?(::Rails.env)
-
-        # Accept a complete :full_cert_path allowing arbitrary certificate names, or create a default from the Rails env
-        cert_path = @opts[:full_cert_path] || begin
-          # Note that RAILS_ROOT is still here not from Rails, but to handle passing in root from sender_daemon
-          @opts[:root_path] ||= defined?(::Rails.root) ? ::Rails.root.to_s : (defined?(RAILS_ROOT) ? RAILS_ROOT : '/')
-          @opts[:cert_path] ||= File.join(File.expand_path(@opts[:root_path]), "config", "certs")
-          @opts[:cert_name] ||= apn_production? ? "apn_production.pem" : "apn_development.pem"
-
-          File.join(@opts[:cert_path], @opts[:cert_name])
-        end
-        
-        @apn_cert = File.read(cert_path) if File.exists?(cert_path)
-        log_and_die("Please specify correct :full_cert_path. No apple push notification certificate found in: #{cert_path}") unless @apn_cert
       end
+
+
       
       # Open socket to Apple's servers
       def setup_connection
@@ -120,6 +109,12 @@ module APN
         rescue Exception => e
           log(:error, "Error closing TCP Socket: #{e}")
         end
+      end
+
+
+      def define_certificate(full_cert_path)
+        @apn_cert = File.read(full_cert_path) if File.exists?(full_cert_path)
+        log_and_die("Please specify correct :full_cert_path. No apple push notification certificate found in: #{cert_path}") unless @apn_cert
       end
       
     end
