@@ -23,6 +23,12 @@ module APN
   # See README for usage and details.
   class Feedback
     include APN::Connection::Base
+
+    def initialize(full_cert_path, opts = {})
+      define_certificate(full_cert_path)
+      super(opts)
+
+    end
         
     # Returns array of APN::FeedbackItem elements read from Apple. Connects to Apple once and caches the
     # data, continues to returns cached data unless called with <code>data(true)</code>, which clears the

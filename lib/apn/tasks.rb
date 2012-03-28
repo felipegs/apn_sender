@@ -8,7 +8,7 @@ namespace :apn do
   task :sender => :setup do
     require 'apn'
 
-    worker = APN::Sender.new(:full_cert_path => ENV['FULL_CERT_PATH'], :cert_path => ENV['CERT_PATH'], :environment => ENV['ENVIRONMENT'], :cert_pass => ENV['CERT_PASS'])
+    worker = APN::Sender.new(:environment => ENV['ENVIRONMENT'])
     worker.verbose = ENV['LOGGING'] || ENV['VERBOSE']
     worker.very_verbose = ENV['VVERBOSE']
 
