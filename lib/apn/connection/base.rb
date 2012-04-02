@@ -113,10 +113,10 @@ module APN
 
 
       def define_certificate(full_cert_path)
-        @full_cert_path = full_cert_path
-        if @full_cert_path != full_cert_path
+        if @full_cert_path.present? && @full_cert_path != full_cert_path
           teardown_connection
         end
+        @full_cert_path = full_cert_path
         @apn_cert = File.read(full_cert_path) if File.exists?(full_cert_path)
         log_and_die("Please specify correct :full_cert_path. No apple push notification certificate found in: #{full_cert_path}") unless @apn_cert
       end
