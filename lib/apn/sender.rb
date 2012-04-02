@@ -16,7 +16,7 @@ module APN
   # If a socket error is encountered, will teardown the connection and retry again twice before admitting defeat.
   class Sender < ::Resque::Worker
     include APN::Connection::Base
-    TIMES_TO_RETRY_SOCKET_ERROR = 2
+    TIMES_TO_RETRY_SOCKET_ERROR = 5
                                 
     # Send a raw string over the socket to Apple's servers (presumably already formatted by APN::Notification)
     def send_to_apple(notification, full_cert_path , attempt = 0)
