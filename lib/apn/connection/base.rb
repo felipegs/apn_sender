@@ -8,7 +8,7 @@ module APN
     # responsibilities so APN::Sender and APN::Feedback and focus on their respective specialties.
     module Base
       attr_accessor :opts, :logger
-      
+
       def initialize(opts = {})
         @opts = opts
 
@@ -16,27 +16,27 @@ module APN
         log(:info, "APN::Sender initializing. Establishing connections first...") if @opts[:verbose]
         setup_paths
 
-        super( APN::QUEUE_NAME ) if self.class.ancestors.include?(Resque::Worker)
+        super(APN::QUEUE_NAME) if self.class.ancestors.include?(Resque::Worker)
       end
-      
+
       # Lazy-connect the socket once we try to access it in some way
       def socket
         setup_connection unless @socket
         return @socket
       end
-            
+
       protected
-      
+
       # Default to Rails or Merg logger, if available
       def setup_logger
         @logger = if defined?(Merb::Logger)
-          Merb.logger
-        elsif defined?(::Rails.logger)
-          ::Rails.logger
-        end
+                    Merb.logger
+                  elsif defined?(::Rails.logger)
+                    ::Rails.logger
+                  end
         @logger ||= Logger.new(STDOUT)
       end
-      
+
       # Log message to any logger provided by the user (e.g. the Rails logger).
       # Accepts +log_level+, +message+, since that seems to make the most sense,
       # and just +message+, to be compatible with Resque's log method and to enable
@@ -45,6 +45,7 @@ module APN
       # Perhaps a method definition of +message, +level+ would make more sense, but
       # that's also the complete opposite of what anyone comming from rails would expect.
       alias_method(:resque_log, :log) if defined?(log)
+
       def log(level, message = nil)
         level, message = 'info', level if message.nil? # Handle only one argument if called from Resque, which expects only message
 
@@ -52,25 +53,24 @@ module APN
         return false unless self.logger && self.logger.respond_to?(level)
         self.logger.send(level, "#{Time.now}: #{message}")
       end
-      
+
       # Log the message first, to ensure it reports what went wrong if in daemon mode. 
       # Then die, because something went horribly wrong.
       def log_and_die(msg)
         log(:fatal, msg)
         raise msg
       end
-      
+
       def apn_production?
         @opts[:environment] && @opts[:environment] != '' && :production == @opts[:environment].to_sym
       end
-      
+
       # Get a fix on the .pem certificate we'll be using for SSL
       def setup_paths
         @opts[:environment] ||= ::Rails.env if defined?(::Rails.env)
       end
 
 
-      
       # Open socket to Apple's servers
       def setup_connection
         log_and_die("Missing apple push notification certificate") unless @apn_cert
@@ -79,7 +79,7 @@ module APN
 
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.cert = OpenSSL::X509::Certificate.new(@apn_cert)
-        
+
         if @opts[:cert_pass]
           ctx.key = OpenSSL::PKey::RSA.new(@apn_cert, @opts[:cert_pass])
         else
@@ -113,14 +113,20 @@ module APN
 
 
       def define_certificate(full_cert_path)
+        unless File.exists?(full_cert_path)
+          log(:error, "Please specify correct :full_cert_path. No apple push notification certificate found in: #{full_cert_path}")
+          raise CertificateNotFound
+        end
         if @full_cert_path.present? && @full_cert_path != full_cert_path
           teardown_connection
         end
         @full_cert_path = full_cert_path
-        @apn_cert = File.read(full_cert_path) if File.exists?(full_cert_path)
-        log_and_die("Please specify correct :full_cert_path. No apple push notification certificate found in: #{full_cert_path}") unless @apn_cert
+        @apn_cert = File.read(full_cert_path)
       end
-      
+
+      class CertificateNotFound < RuntimeError
+      end
+
     end
   end
 end
