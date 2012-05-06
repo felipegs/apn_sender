@@ -31,7 +31,7 @@ end
 
 # Ensures we close any open sockets when the worker exits
 APN::QueueManager.before_unregister_worker do |worker|
-  worker.send(:teardown_connection) if worker.respond_to?(:teardown_connection)
+  worker.send(:teardown_all_connections) if worker.respond_to?(:teardown_all_connections)
 end
 
 

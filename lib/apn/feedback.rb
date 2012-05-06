@@ -26,7 +26,7 @@ module APN
 
     def initialize(full_cert_path, opts = {})
       super(opts)
-      define_certificate(full_cert_path)
+      @certificate_path = full_cert_path
     end
         
     # Returns array of APN::FeedbackItem elements read from Apple. Connects to Apple once and caches the
@@ -50,7 +50,7 @@ module APN
     
     # Prettify to return meaningful status information when printed. Can't add these directly to connection/base, because Resque depends on decoding to_s
     def to_s
-      "#{@socket ? 'Connected' : 'Connection not currently established'} to #{apn_host} on #{apn_port}"
+      "#{@connections[@certificate_path][:socket] ? 'Connected' : 'Connection not currently established'} to #{apn_host} on #{apn_port}"
     end
     
     protected
@@ -61,7 +61,7 @@ module APN
       feedback = []
 
       # Hi Apple
-      setup_connection
+      setup_connection(@certificate_path)
 
       # Unpacking code borrowed from http://github.com/jpoz/APNS/blob/master/lib/apns/core.rb
       while bunch = socket.read(38)   # Read data from the socket
@@ -70,7 +70,7 @@ module APN
       end
 
       # Bye Apple
-      teardown_connection
+      teardown_connection(@certificate_path)
 
       return feedback
     end
