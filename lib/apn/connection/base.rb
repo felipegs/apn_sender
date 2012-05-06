@@ -80,13 +80,13 @@ module APN
         log(:info, "Closing connections...") if @opts[:verbose]
 
         begin
-          @connections[full_cert_path][:socket].close if @socket
+          @connections[full_cert_path][:socket].close if @connections[full_cert_path][:socket]
         rescue Exception => e
           log(:error, "Error closing SSL Socket: #{e}")
         end
 
         begin
-          @connections[full_cert_path][:socket_tcp].close if @socket_tcp
+          @connections[full_cert_path][:socket_tcp].close if  @connections[full_cert_path][:socket_tcp].close
         rescue Exception => e
           log(:error, "Error closing TCP Socket: #{e}")
         end
