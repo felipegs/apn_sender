@@ -86,7 +86,7 @@ module APN
         end
 
         begin
-          @connections[full_cert_path][:socket_tcp].close if  @connections[full_cert_path][:socket_tcp].close
+          @connections[full_cert_path][:socket_tcp].close if  @connections[full_cert_path][:socket_tcp]
         rescue Exception => e
           log(:error, "Error closing TCP Socket: #{e}")
         end
