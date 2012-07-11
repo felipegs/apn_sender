@@ -17,6 +17,7 @@ module APN
         setup_paths
         @connections = {}
         @certificates = {}
+        super(APN::QUEUE_NAME) if self.class.ancestors.include?(Resque::Worker)
       end
 
       def setup_connection(full_cert_path)
@@ -29,7 +30,7 @@ module APN
         ctx.key = OpenSSL::PKey::RSA.new(@certificates[full_cert_path][:apn_cert])
 
         @connections[full_cert_path][:socket_tcp] = TCPSocket.new(apn_host, apn_port)
-        @connections[full_cert_path][:socket] = OpenSSL::SSL::SSLSocket.new(connections[full_cert_path][:socket_tcp], ctx)
+        @connections[full_cert_path][:socket] = OpenSSL::SSL::SSLSocket.new(@connections[full_cert_path][:socket_tcp], ctx)
         @connections[full_cert_path][:socket].sync = true
         @connections[full_cert_path][:socket].connect
       rescue SocketError => error
