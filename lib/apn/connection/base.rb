@@ -22,6 +22,7 @@ module APN
 
       def setup_connection(full_cert_path)
         setup_certificate(full_cert_path)
+        @connections[full_cert_path] ||= {}
         log_and_die("Trying to open half-open connection") if @connections[full_cert_path][:socket] || @connections[full_cert_path][:socket_tcp]
 
         ctx = OpenSSL::SSL::SSLContext.new
@@ -38,6 +39,7 @@ module APN
       end
 
       def socket(full_cert_path)
+        @connections[full_cert_path] ||= {}
         setup_connection(full_cert_path) unless  @connections[full_cert_path][:socket]
         @connections[full_cert_path][:socket]
       end
@@ -106,6 +108,7 @@ module APN
           log(:error, "Please specify correct :full_cert_path. No apple push notification certificate found in: #{full_cert_path}")
           raise CertificateNotFound
         end
+        @certificates[full_cert_path] = {}
         @certificates[full_cert_path][:apn_cert] ||= File.read(full_cert_path)
       end
 
