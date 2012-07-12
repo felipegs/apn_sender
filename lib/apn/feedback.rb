@@ -50,7 +50,7 @@ module APN
     
     # Prettify to return meaningful status information when printed. Can't add these directly to connection/base, because Resque depends on decoding to_s
     def to_s
-      "#{@connections[@certificate_path][:socket] ? 'Connected' : 'Connection not currently established'} to #{apn_host} on #{apn_port}"
+      "#{@connections[@certificate_path] and @connections[@certificate_path][:socket] ? 'Connected' : 'Connection not currently established'} to #{apn_host} on #{apn_port}"
     end
     
     protected
