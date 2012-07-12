@@ -105,7 +105,7 @@ module APN
       def setup_certificate(full_cert_path)
 
         @certificates[full_cert_path] = {}
-        @certificates[full_cert_path][:apn_cert] ||= open(full_cert_path).read
+        @certificates[full_cert_path][:apn_cert] ||= open(full_cert_path) {|file| file.read}
       end
 
 
