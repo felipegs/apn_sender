@@ -104,16 +104,10 @@ module APN
       private
       def setup_certificate(full_cert_path)
 
-        unless File.exists?(full_cert_path)
-          log(:error, "Please specify correct :full_cert_path. No apple push notification certificate found in: #{full_cert_path}")
-          raise CertificateNotFound
-        end
         @certificates[full_cert_path] = {}
-        @certificates[full_cert_path][:apn_cert] ||= File.read(full_cert_path)
+        @certificates[full_cert_path][:apn_cert] ||= open(full_cert_path).read
       end
 
-      class CertificateNotFound < RuntimeError
-      end
 
     end
   end
